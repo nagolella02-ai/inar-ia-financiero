@@ -174,7 +174,7 @@ def cargar_balance_siigo(archivo) -> pd.DataFrame:
             header_idx = idx
             break
 
-    df = pd.read_excel(archivo) if header_idx is None else pd.read_excel(archivo, header=header_idx)
+    df = pd.read_excel(archivo, dtype=str) if header_idx is None else pd.read_excel(archivo, header=header_idx, dtype=str)
     df.columns = [str(c).strip() for c in df.columns]
 
     for col in ["GRUPO", "CUENTA", "SUBCUENT", "AUXILIAR", "SUBAUXIL", "NIT", "DESCRIPCION"]:
@@ -186,6 +186,8 @@ def cargar_balance_siigo(archivo) -> pd.DataFrame:
                 .str.strip()
                 .str.replace(r"\.0$", "", regex=True)
             )
+            if col in ["CUENTA", "SUBCUENT", "AUXILIAR", "SUBAUXIL"]:
+                df[col] = df[col].apply(lambda x: x.zfill(2) if x.isdigit() and len(x) == 1 else x)
         else:
             df[col] = ""
 
